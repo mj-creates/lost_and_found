@@ -47,6 +47,7 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
     const savedItem = await newItem.save();
     res.status(201).json(savedItem);
   } catch (err) {
+    console.error("Database Error:", err); // <--- Add this line
     res.status(500).json({ error: 'Failed to post item' });
   }
 });
