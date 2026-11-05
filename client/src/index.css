@@ -3,4 +3,9 @@
 body {
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+<<<<<<< Updated upstream
+=======
+  background-color: #fff7ed; /* orange-50 background per project design */
+  color: #111827;
+>>>>>>> Stashed changes
 }
