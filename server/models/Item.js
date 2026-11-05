@@ -4,24 +4,28 @@ const itemSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: [true, 'Title is required'],
+      required: true,
       trim: true,
     },
     description: {
       type: String,
-      required: [true, 'Description is required'],
+      required: true,
     },
     category: {
       type: String,
-      required: [true, 'Category is required'],
+      required: true,
     },
     type: {
       type: String,
-      required: [true, 'Type (lost/found) is required'],
+      required: true,
       lowercase: true,
       enum: ['lost', 'found'],
     },
     location: {
+      type: String,
+      default: '',
+    },
+    contact: {
       type: String,
       default: '',
     },
@@ -33,19 +37,15 @@ const itemSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
-    contact: {
-      type: String,
-      default: '',
+    postedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
     },
     status: {
       type: String,
       enum: ['open', 'returned'],
       default: 'open',
-    },
-    postedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'PostedBy user is required'],
     },
   },
   {

@@ -8,7 +8,7 @@ module.exports = (req, res, next) => {
 
   if (!token) {
     return res.status(401).json({
-      message: "Not logged in"
+      message: "Not logged in",
     });
   }
 
@@ -22,7 +22,7 @@ module.exports = (req, res, next) => {
     next();
   } catch (error) {
     return res.status(401).json({
-      message: "Invalid token"
+      message: "Invalid token",
     });
   }
 };

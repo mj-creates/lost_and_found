@@ -3,7 +3,7 @@ const Item = require('../models/Item');
 const { upload } = require('../config/cloudinary');
 const auth = require('../middleware/auth');
 
-// GET /api/items: Fetch items with optional filter (type, category, search)
+// GET /api/items: Fetch items with filters and search
 router.get('/', async (req, res) => {
   try {
     const { type, category, search } = req.query;
@@ -22,14 +22,11 @@ router.get('/', async (req, res) => {
     res.json(items);
   } catch (error) {
     console.error('Error fetching items:', error);
-    res.status(500).json({
-      message: 'Error fetching items',
-      error: error.message,
-    });
+    res.status(500).json({ error: 'Server error', message: error.message });
   }
 });
 
-// GET /api/items/:id: Fetch single item by ID with poster information
+// GET /api/items/:id: Fetch a single item by ID
 router.get('/:id', async (req, res) => {
   try {
     const item = await Item.findById(req.params.id).populate('postedBy', 'name email phone');
@@ -38,15 +35,12 @@ router.get('/:id', async (req, res) => {
     }
     res.json(item);
   } catch (error) {
-    console.error('Error fetching item by id:', error);
-    res.status(500).json({
-      message: 'Error fetching item details',
-      error: error.message,
-    });
+    console.error('Error fetching item details:', error);
+    res.status(500).json({ error: 'Server error', message: error.message });
   }
 });
 
-// POST /api/items: Create a new lost/found item with optional photo upload
+// POST /api/items: Add a new item with a photo
 router.post('/', auth, upload.single('image'), async (req, res) => {
   try {
     const { title, description, category, type, location, contact, date } = req.body || {};
@@ -74,8 +68,8 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
   } catch (error) {
     console.error('Database Error in POST /api/items:', error);
     res.status(500).json({
-      message: error.message || 'Failed to post item',
-      error: error.toString(),
+      error: 'Failed to post item',
+      message: error.message || 'Database error occurred while posting item',
     });
   }
 });
