@@ -4,7 +4,8 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
