@@ -8,12 +8,17 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
-const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  process.env.CLIENT_URL,
+].filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
         return callback(null, true);
       }
       return callback(null, true);
@@ -31,7 +36,7 @@ app.use('/api/items', require('./routes/owner'));
 app.use('/api/owner', require('./routes/owner'));
 app.use('/api/items', require('./routes/items'));
 
-app.get('/', (req, res) => res.send('API is running'));
+app.get('/', (req, res) => res.send('Lost & Found API is running'));
 
 const PORT = process.env.PORT || 5000;
 
