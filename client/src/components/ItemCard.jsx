@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
+import StatusBadge from './StatusBadge';
 
 export default function ItemCard({ item }) {
   if (!item) return null;
 
-  const isLost = item.type?.toLowerCase() === 'lost';
   const formattedDate = item.date
     ? new Date(item.date).toLocaleDateString()
     : item.createdAt
@@ -15,15 +15,9 @@ export default function ItemCard({ item }) {
       to={`/item/${item._id}`}
       className="group bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden border border-gray-100 flex flex-col relative"
     >
-      {/* Type badge at top right */}
+      {/* Badges at top right */}
       <div className="absolute top-3 right-3 z-10">
-        <span
-          className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-sm ${
-            isLost ? 'bg-red-500' : 'bg-green-500'
-          }`}
-        >
-          {item.type || 'Item'}
-        </span>
+        <StatusBadge status={item.status} type={item.type} />
       </div>
 
       {/* Image if available */}

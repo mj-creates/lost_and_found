@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import Filters from '../components/Filters';
 import ItemCard from '../components/ItemCard';
 
@@ -25,9 +25,10 @@ export default function Home() {
         if (filters.category) params.category = filters.category;
         if (filters.type) params.type = filters.type;
 
-        const response = await axios.get('http://localhost:5000/api/items', { params });
+        const response = await api.get('/items', { params });
         if (isMounted) {
-          setItems(response.data);
+          const data = response.data.items || response.data || [];
+          setItems(Array.isArray(data) ? data : []);
         }
       } catch (err) {
         console.error('Error fetching items:', err);
@@ -66,7 +67,7 @@ export default function Home() {
         onChange={handleFilterChange}
       />
 
-      {/* Loading state: simple blue loading state */}
+      {/* Loading state */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-16">
           <svg
@@ -92,17 +93,17 @@ export default function Home() {
           <p className="text-blue-600 font-semibold text-lg">Loading items...</p>
         </div>
       ) : error ? (
-        <div className="bg-white border border-red-200 text-red-600 rounded-lg p-6 text-center shadow-sm">
+        <div className="bg-white border border-red-200 text-red-600 rounded-xl p-6 text-center shadow-sm">
           <p>{error}</p>
           <button
             onClick={retryFetch}
-            className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer"
+            className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer text-sm font-semibold"
           >
             Try Again
           </button>
         </div>
       ) : items.length === 0 ? (
-        <div className="bg-white rounded-lg p-12 text-center shadow-sm border border-gray-100">
+        <div className="bg-white rounded-xl p-12 text-center shadow-sm border border-gray-100">
           <p className="text-gray-600 text-lg">No items found matching your criteria.</p>
         </div>
       ) : (

@@ -27,6 +27,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/items', require('./routes/owner'));
 app.use('/api/owner', require('./routes/owner'));
 app.use('/api/items', require('./routes/items'));
 

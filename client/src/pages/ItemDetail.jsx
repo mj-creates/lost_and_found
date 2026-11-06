@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
+import StatusBadge from '../components/StatusBadge';
 
 export default function ItemDetail() {
   const { id } = useParams();
@@ -13,7 +14,7 @@ export default function ItemDetail() {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`http://localhost:5000/api/items/${id}`);
+        const response = await api.get(`/items/${id}`);
         setItem(response.data);
       } catch (err) {
         console.error('Error fetching item details:', err);
@@ -70,7 +71,6 @@ export default function ItemDetail() {
     );
   }
 
-  const isLost = item.type?.toLowerCase() === 'lost';
   const formattedDate = item.date
     ? new Date(item.date).toLocaleDateString(undefined, {
         year: 'numeric',
@@ -110,7 +110,7 @@ export default function ItemDetail() {
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
+      <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
         {/* Large image */}
         {item.imageUrl && (
           <div className="w-full bg-gray-100 max-h-[480px] overflow-hidden flex items-center justify-center">
@@ -125,15 +125,7 @@ export default function ItemDetail() {
         <div className="p-6 sm:p-8">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
             <h1 className="text-3xl font-bold text-gray-900">{item.title}</h1>
-
-            {/* Bold red/green status badge */}
-            <span
-              className={`px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider text-white shadow-sm ${
-                isLost ? 'bg-red-500' : 'bg-green-500'
-              }`}
-            >
-              {item.type}
-            </span>
+            <StatusBadge status={item.status} type={item.type} />
           </div>
 
           <div className="text-gray-700 text-base leading-relaxed mb-6 whitespace-pre-wrap">
@@ -142,35 +134,45 @@ export default function ItemDetail() {
 
           <hr className="border-gray-200 my-6" />
 
-          {/* All item details (category, location, contact, date) */}
+          {/* All item details (category, location, contact, date, posted by) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div className="bg-orange-50 p-3.5 rounded-md">
+            <div className="bg-orange-50 p-3.5 rounded-lg">
               <span className="block text-gray-500 font-medium">Category</span>
               <span className="text-gray-900 font-semibold text-base">
                 {item.category || 'Not specified'}
               </span>
             </div>
 
-            <div className="bg-orange-50 p-3.5 rounded-md">
+            <div className="bg-orange-50 p-3.5 rounded-lg">
               <span className="block text-gray-500 font-medium">Location</span>
               <span className="text-gray-900 font-semibold text-base">
                 {item.location || 'Not specified'}
               </span>
             </div>
 
-            <div className="bg-orange-50 p-3.5 rounded-md">
+            <div className="bg-orange-50 p-3.5 rounded-lg">
               <span className="block text-gray-500 font-medium">Contact</span>
               <span className="text-gray-900 font-semibold text-base">
                 {item.contact || 'Not specified'}
               </span>
             </div>
 
-            <div className="bg-orange-50 p-3.5 rounded-md">
+            <div className="bg-orange-50 p-3.5 rounded-lg">
               <span className="block text-gray-500 font-medium">Date</span>
               <span className="text-gray-900 font-semibold text-base">
                 {formattedDate}
               </span>
             </div>
+
+            {item.postedBy && (
+              <div className="bg-orange-50 p-3.5 rounded-lg sm:col-span-2">
+                <span className="block text-gray-500 font-medium">Posted By</span>
+                <span className="text-gray-900 font-semibold text-base">
+                  {typeof item.postedBy === 'object' ? item.postedBy.name : 'Registered User'}
+                  {item.postedBy.email ? ` (${item.postedBy.email})` : ''}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
