@@ -38,18 +38,42 @@ export default function MyPosts() {
   };
 
   useEffect(() => {
-    fetchMyPosts();
+    let isMounted = true;
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await api.get('/items/mine');
+        if (isMounted) {
+          const data = response.data.items || response.data || [];
+          setItems(Array.isArray(data) ? data : []);
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error('Error fetching my posts:', err);
+          setError(err.response?.data?.message || err.message || 'Failed to load your posts.');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    load();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleMarkReturned = async (id) => {
-    if (!window.confirm('Have you handed back or received this item? Click OK to mark as Returned.')) {
+    if (!window.confirm('Has this item been handed back or received? Click OK to mark as Returned.')) {
       return;
     }
 
     try {
       await api.patch(`/items/${id}/returned`);
-      setNotice('Item marked as returned successfully!');
-      setTimeout(() => setNotice(null), 4000);
+      setNotice('Item marked as returned.');
+      setTimeout(() => setNotice(null), 3500);
       setItems((prev) =>
         prev.map((item) => (item._id === id ? { ...item, status: 'returned' } : item))
       );
@@ -60,14 +84,14 @@ export default function MyPosts() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+    if (!window.confirm('Are you sure you want to delete this listing?')) {
       return;
     }
 
     try {
       await api.delete(`/items/${id}`);
-      setNotice('Item deleted successfully.');
-      setTimeout(() => setNotice(null), 4000);
+      setNotice('Listing removed.');
+      setTimeout(() => setNotice(null), 3500);
       setItems((prev) => prev.filter((item) => item._id !== id));
     } catch (err) {
       console.error('Error deleting item:', err);
@@ -108,8 +132,8 @@ export default function MyPosts() {
       setItems((prev) =>
         prev.map((item) => (item._id === editingItem._id ? { ...item, ...updatedItem } : item))
       );
-      setNotice('Item updated successfully!');
-      setTimeout(() => setNotice(null), 4000);
+      setNotice('Item updated successfully.');
+      setTimeout(() => setNotice(null), 3500);
       closeEditModal();
     } catch (err) {
       console.error('Error updating item:', err);
@@ -120,66 +144,64 @@ export default function MyPosts() {
   };
 
   return (
-    <div className="py-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-neutral-200">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Posted Items</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Manage your lost and found listings, update details, or mark them as returned.
+          <h1 className="text-xl font-bold tracking-tight text-neutral-900">
+            My Posts
+          </h1>
+          <p className="text-xs text-neutral-500 mt-1">
+            Manage your submitted listings, update information, or mark items as returned.
           </p>
         </div>
+
         <Link
           to="/post"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-sm transition-colors text-sm"
+          className="bg-neutral-900 hover:bg-black text-white text-xs font-semibold px-4 py-2 rounded-md shadow-xs transition-colors self-start sm:self-auto"
         >
           + Post New Item
         </Link>
       </div>
 
       {notice && (
-        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-sm flex items-center justify-between">
+        <div className="p-3 bg-neutral-900 text-white rounded-md text-xs flex items-center justify-between">
           <span>✓ {notice}</span>
-          <button onClick={() => setNotice(null)} className="text-emerald-600 hover:text-emerald-900 font-bold">
+          <button onClick={() => setNotice(null)} className="text-neutral-400 hover:text-white text-sm font-bold">
             ×
           </button>
         </div>
       )}
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-center justify-between">
+        <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-xs flex items-center justify-between">
           <span>{error}</span>
-          <button onClick={fetchMyPosts} className="underline ml-4 font-semibold hover:text-red-900">
+          <button onClick={fetchMyPosts} className="underline font-semibold hover:text-red-900 ml-4">
             Retry
           </button>
         </div>
       )}
 
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20">
-          <svg className="animate-spin h-10 w-10 text-blue-600 mb-3" viewBox="0 0 24 24" fill="none">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-          </svg>
-          <p className="text-gray-600 font-medium text-sm">Loading your posts...</p>
+        <div className="flex flex-col items-center justify-center py-20 text-neutral-400">
+          <div className="w-6 h-6 border-2 border-neutral-900 border-t-transparent rounded-full animate-spin mb-3"></div>
+          <span className="text-xs font-medium text-neutral-600">Loading your posts...</span>
         </div>
       ) : items.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center max-w-lg mx-auto my-8">
-          <div className="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-            📦
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">You have not posted anything yet</h2>
-          <p className="text-sm text-gray-500 mb-6">
-            If you have lost an item or found something on campus, report it so the community can reach out!
+        <div className="bg-white border border-neutral-200 rounded-lg p-12 text-center max-w-md mx-auto my-8">
+          <p className="text-sm text-neutral-600 mb-2">You haven't posted any items yet.</p>
+          <p className="text-xs text-neutral-400 mb-6">
+            If you lost or found an item on campus, create a post to let others know.
           </p>
           <Link
             to="/post"
-            className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-2.5 rounded-lg shadow-sm transition-colors text-sm"
+            className="inline-block bg-neutral-900 hover:bg-black text-white text-xs font-semibold px-4 py-2 rounded-md shadow-xs transition-colors"
           >
-            Post an Item Now
+            Create Your First Listing
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((item) => {
             const isReturned = item.status?.toLowerCase() === 'returned';
             const formattedDate = item.date
@@ -191,64 +213,62 @@ export default function MyPosts() {
             return (
               <div
                 key={item._id}
-                className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow"
+                className="bg-white rounded-lg border border-neutral-200 overflow-hidden flex flex-col hover:border-neutral-400 transition-colors shadow-xs"
               >
+                {/* Photo or placeholder */}
                 {item.imageUrl ? (
-                  <div className="w-full h-44 bg-gray-100 overflow-hidden relative">
+                  <div className="w-full h-40 bg-neutral-100 overflow-hidden relative">
                     <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
                     <div className="absolute top-2 right-2">
                       <StatusBadge status={item.status} type={item.type} />
                     </div>
                   </div>
                 ) : (
-                  <div className="w-full h-28 bg-gray-50 border-b border-gray-100 flex items-center justify-between px-4">
-                    <span className="text-gray-400 text-sm">No photo uploaded</span>
+                  <div className="w-full h-20 bg-neutral-50 border-b border-neutral-200 flex items-center justify-between px-3">
+                    <span className="text-neutral-400 text-xs">No image</span>
                     <StatusBadge status={item.status} type={item.type} />
                   </div>
                 )}
 
-                <div className="p-5 flex flex-col flex-grow">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="text-lg font-bold text-gray-900 line-clamp-1">{item.title}</h3>
-                  </div>
+                <div className="p-4 flex flex-col flex-1">
+                  <h3 className="text-sm font-semibold text-neutral-900 line-clamp-1 mb-1">
+                    {item.title}
+                  </h3>
 
-                  <p className="text-sm text-gray-600 line-clamp-2 mb-4">{item.description}</p>
+                  <p className="text-xs text-neutral-500 line-clamp-2 mb-3">
+                    {item.description}
+                  </p>
 
-                  <div className="mt-auto space-y-1.5 text-xs text-gray-500 border-t border-gray-100 pt-3">
+                  <div className="mt-auto space-y-1 text-[11px] text-neutral-500 border-t border-neutral-100 pt-2.5 mb-3">
                     <div className="flex justify-between">
-                      <span className="font-medium text-gray-700">Category:</span>
-                      <span>{item.category}</span>
+                      <span>Category:</span>
+                      <span className="text-neutral-700 font-medium">{item.category}</span>
                     </div>
                     {item.location && (
                       <div className="flex justify-between">
-                        <span className="font-medium text-gray-700">Location:</span>
-                        <span className="truncate max-w-[160px]">{item.location}</span>
-                      </div>
-                    )}
-                    {item.contact && (
-                      <div className="flex justify-between">
-                        <span className="font-medium text-gray-700">Contact:</span>
-                        <span>{item.contact}</span>
+                        <span>Location:</span>
+                        <span className="text-neutral-700 font-medium truncate max-w-[150px]">{item.location}</span>
                       </div>
                     )}
                     <div className="flex justify-between">
-                      <span className="font-medium text-gray-700">Date:</span>
-                      <span>{formattedDate}</span>
+                      <span>Date:</span>
+                      <span className="text-neutral-700 font-medium">{formattedDate}</span>
                     </div>
                   </div>
 
-                  {/* Owner Action Buttons */}
-                  <div className="mt-4 pt-3 border-t border-gray-100 flex flex-col gap-2">
+                  {/* Actions: Return (Gold), Edit (Grey), Delete (Subtle Red) */}
+                  <div className="space-y-2 border-t border-neutral-100 pt-3">
                     {!isReturned ? (
                       <button
                         onClick={() => handleMarkReturned(item._id)}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg text-xs transition-colors cursor-pointer flex items-center justify-center gap-1"
+                        className="w-full bg-amber-500 hover:bg-amber-600 text-neutral-950 font-bold py-1.5 px-3 rounded-md text-xs transition-colors flex items-center justify-center space-x-1 cursor-pointer shadow-xs"
+                        title="Mark this item as returned/handed back"
                       >
-                        ✓ Mark as Returned
+                        <span>✓ Mark as Returned</span>
                       </button>
                     ) : (
-                      <div className="text-center text-xs text-emerald-700 font-semibold py-1 bg-emerald-50 rounded-lg border border-emerald-200">
-                        ✓ Handed back / Returned
+                      <div className="text-center text-[11px] text-amber-800 font-semibold py-1 bg-amber-50 rounded-md border border-amber-300">
+                        ✓ Returned
                       </div>
                     )}
 
@@ -256,19 +276,19 @@ export default function MyPosts() {
                       <button
                         onClick={() => openEditModal(item)}
                         disabled={isReturned}
-                        className={`flex-1 font-semibold py-1.5 px-3 rounded-lg text-xs transition-colors border ${
+                        className={`flex-1 py-1 px-2.5 rounded-md text-xs font-medium transition-colors border ${
                           isReturned
-                            ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 cursor-pointer'
+                            ? 'bg-neutral-100 text-neutral-400 border-neutral-200 cursor-not-allowed'
+                            : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50 cursor-pointer'
                         }`}
                       >
-                        ✎ Edit
+                        Edit
                       </button>
                       <button
                         onClick={() => handleDelete(item._id)}
-                        className="flex-1 font-semibold py-1.5 px-3 rounded-lg text-xs transition-colors bg-white text-red-600 border border-red-200 hover:bg-red-50 cursor-pointer"
+                        className="flex-1 py-1 px-2.5 rounded-md text-xs font-medium transition-colors bg-white text-red-600 border border-red-200 hover:bg-red-50 cursor-pointer"
                       >
-                        🗑 Delete
+                        Delete
                       </button>
                     </div>
                   </div>
@@ -279,25 +299,25 @@ export default function MyPosts() {
         </div>
       )}
 
-      {/* Edit Modal */}
+      {/* Minimalist Edit Modal */}
       {editingItem && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8">
-            <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
-              <h2 className="text-xl font-bold text-gray-900">Edit Post</h2>
-              <button onClick={closeEditModal} className="text-gray-400 hover:text-gray-600 text-2xl font-bold">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg border border-neutral-300 max-w-md w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-neutral-200">
+              <h2 className="text-base font-bold text-neutral-900">Edit Listing</h2>
+              <button onClick={closeEditModal} className="text-neutral-400 hover:text-neutral-700 text-lg">
                 ×
               </button>
             </div>
 
-            <form onSubmit={handleEditSubmit} className="space-y-4">
+            <form onSubmit={handleEditSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Type</label>
+                <label className="block font-semibold text-neutral-700 mb-1">Type</label>
                 <select
                   name="type"
                   value={editForm.type}
                   onChange={handleEditChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                  className="w-full px-3 py-1.5 bg-neutral-50 border border-neutral-300 rounded-md"
                 >
                   <option value="lost">Lost</option>
                   <option value="found">Found</option>
@@ -305,24 +325,24 @@ export default function MyPosts() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Title</label>
+                <label className="block font-semibold text-neutral-700 mb-1">Title</label>
                 <input
                   type="text"
                   name="title"
                   value={editForm.title}
                   onChange={handleEditChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  className="w-full px-3 py-1.5 bg-neutral-50 border border-neutral-300 rounded-md"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Category</label>
+                <label className="block font-semibold text-neutral-700 mb-1">Category</label>
                 <select
                   name="category"
                   value={editForm.category}
                   onChange={handleEditChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                  className="w-full px-3 py-1.5 bg-neutral-50 border border-neutral-300 rounded-md"
                 >
                   <option value="Bottle">Bottle</option>
                   <option value="ID Card">ID Card</option>
@@ -334,65 +354,65 @@ export default function MyPosts() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Description</label>
+                <label className="block font-semibold text-neutral-700 mb-1">Description</label>
                 <textarea
                   name="description"
                   rows="3"
                   value={editForm.description}
                   onChange={handleEditChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  className="w-full px-3 py-1.5 bg-neutral-50 border border-neutral-300 rounded-md"
                 ></textarea>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Location</label>
+                  <label className="block font-semibold text-neutral-700 mb-1">Location</label>
                   <input
                     type="text"
                     name="location"
                     value={editForm.location}
                     onChange={handleEditChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    className="w-full px-3 py-1.5 bg-neutral-50 border border-neutral-300 rounded-md"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Date</label>
+                  <label className="block font-semibold text-neutral-700 mb-1">Date</label>
                   <input
                     type="date"
                     name="date"
                     value={editForm.date}
                     onChange={handleEditChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    className="w-full px-3 py-1.5 bg-neutral-50 border border-neutral-300 rounded-md"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Contact Phone / Email</label>
+                <label className="block font-semibold text-neutral-700 mb-1">Contact</label>
                 <input
                   type="text"
                   name="contact"
                   value={editForm.contact}
                   onChange={handleEditChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  className="w-full px-3 py-1.5 bg-neutral-50 border border-neutral-300 rounded-md"
                 />
               </div>
 
-              <div className="flex gap-3 pt-3 border-t border-gray-100">
+              <div className="flex gap-2 pt-3 border-t border-neutral-200">
                 <button
                   type="button"
                   onClick={closeEditModal}
-                  className="flex-1 py-2 px-4 rounded-lg border border-gray-300 text-gray-700 font-semibold text-sm hover:bg-gray-50 transition-colors"
+                  className="flex-1 py-1.5 rounded-md border border-neutral-300 text-neutral-700 font-medium hover:bg-neutral-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={savingEdit}
-                  className="flex-1 py-2 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors disabled:opacity-50"
+                  className="flex-1 py-1.5 rounded-md bg-neutral-900 hover:bg-black text-white font-semibold disabled:opacity-50"
                 >
-                  {savingEdit ? 'Saving...' : 'Save Changes'}
+                  {savingEdit ? 'Saving...' : 'Save'}
                 </button>
               </div>
             </form>

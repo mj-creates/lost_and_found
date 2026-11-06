@@ -1,89 +1,102 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
+  const isActive = (path) => location.pathname === path;
+
   return (
-    <nav className="bg-blue-600 text-white rounded-xl shadow-md px-6 py-3.5 mb-6 flex flex-wrap items-center justify-between gap-4">
-      {/* Brand logo & Core navigation */}
-      <div className="flex items-center space-x-4 sm:space-x-6">
-        <Link
-          to="/"
-          className="text-xl font-bold tracking-wide hover:text-blue-100 transition-colors flex items-center space-x-2"
-        >
-          <svg className="w-6 h-6 text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <span>Lost &amp; Found</span>
-        </Link>
-        <Link
-          to="/"
-          className="text-sm font-medium hover:text-blue-100 transition-colors"
-        >
-          Home
-        </Link>
-        <Link
-          to="/choice"
-          className="text-sm font-semibold text-yellow-200 hover:text-white transition-colors bg-blue-700/60 px-2.5 py-1 rounded-md border border-blue-500/50 hover:bg-blue-700"
-          title="Choice Screen: I Lost Something / I Found Something"
-        >
-          ✦ I Lost / Found
-        </Link>
+    <header className="bg-neutral-900 border-b border-neutral-800 text-white sticky top-0 z-40">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+        {/* Brand logo & main links */}
+        <div className="flex items-center space-x-6">
+          <Link
+            to="/"
+            className="text-base font-bold tracking-tight text-white flex items-center space-x-2 hover:opacity-90 transition-opacity"
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-white inline-block"></span>
+            <span>Lost &amp; Found</span>
+          </Link>
+
+          <nav className="hidden md:flex items-center space-x-1 text-xs font-medium">
+            <Link
+              to="/"
+              className={`px-3 py-1.5 rounded-md transition-colors ${
+                isActive('/') ? 'text-white bg-neutral-800' : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              Browse
+            </Link>
+            <Link
+              to="/choice"
+              className={`px-3 py-1.5 rounded-md transition-colors ${
+                isActive('/choice') ? 'text-white bg-neutral-800' : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              Lost / Found
+            </Link>
+          </nav>
+        </div>
+
+        {/* Right side actions */}
+        <div className="flex items-center space-x-3 text-xs">
+          {user ? (
+            <>
+              <Link
+                to="/my-posts"
+                className={`px-3 py-1.5 rounded-md transition-colors ${
+                  isActive('/my-posts') ? 'text-white bg-neutral-800' : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                My Posts
+              </Link>
+
+              <Link
+                to="/post"
+                className="bg-white hover:bg-neutral-200 text-neutral-950 font-semibold px-3 py-1.5 rounded-md transition-colors shadow-sm"
+              >
+                + Post Item
+              </Link>
+
+              <div className="h-4 w-px bg-neutral-800 mx-1"></div>
+
+              <span className="text-neutral-400 hidden sm:inline">
+                {user.name}
+              </span>
+
+              <button
+                onClick={handleLogout}
+                className="text-neutral-400 hover:text-white py-1 px-2 rounded hover:bg-neutral-800 transition-colors cursor-pointer"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="text-neutral-300 hover:text-white px-3 py-1.5 rounded-md transition-colors font-medium"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/register"
+                className="bg-white hover:bg-neutral-200 text-neutral-950 font-semibold px-3 py-1.5 rounded-md transition-colors shadow-sm"
+              >
+                Register
+              </Link>
+            </>
+          )}
+        </div>
       </div>
-
-      {/* Auth state links */}
-      <div className="flex items-center space-x-4 text-sm font-medium">
-        {user ? (
-          <>
-            <span className="text-blue-100 hidden sm:inline">
-              Hi, <span className="text-white font-semibold">{user.name}</span>
-            </span>
-
-            <Link
-              to="/my-posts"
-              className="text-blue-100 hover:text-white transition-colors"
-            >
-              My Posts
-            </Link>
-
-            <Link
-              to="/post"
-              className="bg-white text-blue-600 font-semibold px-3.5 py-1.5 rounded-lg hover:bg-blue-50 transition-colors shadow-sm text-sm"
-            >
-              Post Item
-            </Link>
-
-            <button
-              onClick={handleLogout}
-              className="bg-blue-700 hover:bg-blue-800 text-white px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer text-sm"
-            >
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <Link
-              to="/login"
-              className="text-white hover:text-blue-100 font-semibold transition-colors px-3 py-1.5 rounded-lg hover:bg-blue-700/50"
-            >
-              Login
-            </Link>
-            <Link
-              to="/register"
-              className="bg-white text-blue-600 font-semibold px-3.5 py-1.5 rounded-lg hover:bg-blue-50 transition-colors shadow-sm"
-            >
-              Register
-            </Link>
-          </>
-        )}
-      </div>
-    </nav>
+    </header>
   );
 }

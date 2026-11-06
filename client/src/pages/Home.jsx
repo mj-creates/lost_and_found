@@ -3,10 +3,8 @@ import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import Filters from '../components/Filters';
 import ItemCard from '../components/ItemCard';
-import { useAuth } from '../context/AuthContext';
 
 export default function Home() {
-  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -36,7 +34,7 @@ export default function Home() {
       } catch (err) {
         console.error('Error fetching items:', err);
         if (isMounted) {
-          setError('Failed to load items. Please make sure the server is running.');
+          setError('Failed to load items. Make sure the server is running.');
         }
       } finally {
         if (isMounted) {
@@ -61,49 +59,38 @@ export default function Home() {
   };
 
   return (
-    <div>
-      {/* Hero / Landing Banner */}
-      <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 text-white rounded-2xl p-6 sm:p-8 shadow-lg mb-8 text-center relative overflow-hidden">
-        <div className="max-w-2xl mx-auto relative z-10">
-          <span className="text-xs uppercase font-extrabold tracking-widest bg-white/20 text-blue-100 px-3.5 py-1 rounded-full inline-block mb-3">
-            Campus Lost &amp; Found Portal
-          </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold mb-3 tracking-tight">
-            Find What You Lost. Return What You Found.
+    <div className="space-y-6">
+      {/* Minimalist Header & Quick Action Buttons */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-neutral-200">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-neutral-900">
+            Lost &amp; Found Directory
           </h1>
-          <p className="text-blue-100 text-sm sm:text-base leading-relaxed mb-6">
-            Stop scrolling through endless chat messages. Search reported items, contact owners directly, or post a new listing in seconds.
+          <p className="text-xs text-neutral-500 mt-1">
+            Browse campus items, contact finders, or report what you lost or found.
           </p>
+        </div>
 
-          {/* Two Big Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              to="/lost"
-              className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-transform hover:scale-105 flex items-center justify-center space-x-2 text-sm sm:text-base cursor-pointer"
-            >
-              <span>🔍</span>
-              <span>I Lost Something</span>
-            </Link>
-            <Link
-              to="/found"
-              className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-transform hover:scale-105 flex items-center justify-center space-x-2 text-sm sm:text-base cursor-pointer"
-            >
-              <span>🤝</span>
-              <span>I Found Something</span>
-            </Link>
-            {!user && (
-              <Link
-                to="/login"
-                className="w-full sm:w-auto bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl border border-white/30 transition-colors text-sm sm:text-base"
-              >
-                Get Started →
-              </Link>
-            )}
-          </div>
+        {/* The Two Important Action Buttons: Lost (Red) & Found (Green) */}
+        <div className="flex items-center space-x-3">
+          <Link
+            to="/lost"
+            className="inline-flex items-center space-x-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-4 py-2 rounded-md shadow-xs transition-colors"
+          >
+            <span>🔍</span>
+            <span>I Lost Something</span>
+          </Link>
+          <Link
+            to="/found"
+            className="inline-flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-md shadow-xs transition-colors"
+          >
+            <span>🤝</span>
+            <span>I Found Something</span>
+          </Link>
         </div>
       </div>
 
-      {/* Filters component at the top */}
+      {/* Filter Component */}
       <Filters
         search={filters.search}
         category={filters.category}
@@ -111,48 +98,43 @@ export default function Home() {
         onChange={handleFilterChange}
       />
 
-      {/* Loading state */}
+      {/* Content Area */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-16">
-          <svg
-            className="animate-spin h-10 w-10 text-blue-600 mb-3"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v8H4z"
-            ></path>
-          </svg>
-          <p className="text-blue-600 font-semibold text-lg">Loading items...</p>
+        <div className="flex flex-col items-center justify-center py-20 text-neutral-400">
+          <div className="w-6 h-6 border-2 border-neutral-900 border-t-transparent rounded-full animate-spin mb-3"></div>
+          <span className="text-xs font-medium text-neutral-600">Loading items...</span>
         </div>
       ) : error ? (
-        <div className="bg-white border border-red-200 text-red-600 rounded-xl p-6 text-center shadow-sm">
-          <p>{error}</p>
+        <div className="bg-white border border-neutral-300 rounded-lg p-6 text-center">
+          <p className="text-xs text-red-600 mb-3">{error}</p>
           <button
             onClick={retryFetch}
-            className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer text-sm font-semibold"
+            className="text-xs font-semibold text-neutral-900 underline hover:text-black cursor-pointer"
           >
-            Try Again
+            Retry
           </button>
         </div>
       ) : items.length === 0 ? (
-        <div className="bg-white rounded-xl p-12 text-center shadow-sm border border-gray-100">
-          <p className="text-gray-600 text-lg">No items found matching your criteria.</p>
+        <div className="bg-white border border-neutral-200 rounded-lg p-12 text-center">
+          <p className="text-sm text-neutral-500 mb-2">No items found matching your filter.</p>
+          <div className="flex justify-center space-x-3 mt-4">
+            <Link
+              to="/lost"
+              className="text-xs text-red-600 font-medium hover:underline"
+            >
+              Browse Found Items →
+            </Link>
+            <span className="text-neutral-300">|</span>
+            <Link
+              to="/found"
+              className="text-xs text-emerald-600 font-medium hover:underline"
+            >
+              Browse Lost Items →
+            </Link>
+          </div>
         </div>
       ) : (
-        /* Responsive CSS grid of ItemCards */
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {items.map((item) => (
             <ItemCard key={item._id} item={item} />
           ))}

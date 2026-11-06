@@ -13,54 +13,43 @@ export default function ItemCard({ item }) {
   return (
     <Link
       to={`/item/${item._id}`}
-      className="group bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden border border-gray-100 flex flex-col relative"
+      className="group bg-white rounded-lg border border-neutral-200 hover:border-neutral-900 transition-all flex flex-col overflow-hidden relative"
     >
-      {/* Badges at top right */}
-      <div className="absolute top-3 right-3 z-10">
+      {/* Badges pinned at top right */}
+      <div className="absolute top-2.5 right-2.5 z-10">
         <StatusBadge status={item.status} type={item.type} />
       </div>
 
-      {/* Image if available */}
+      {/* Image */}
       {item.imageUrl ? (
-        <div className="w-full h-48 bg-gray-100 overflow-hidden">
+        <div className="w-full h-44 bg-neutral-100 overflow-hidden">
           <img
             src={item.imageUrl}
             alt={item.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-200"
           />
         </div>
       ) : (
-        <div className="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400">
-          <svg
-            className="w-12 h-12 stroke-current"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-            />
-          </svg>
+        <div className="w-full h-44 bg-neutral-100 flex items-center justify-center text-neutral-400 text-xs">
+          <span>No image provided</span>
         </div>
       )}
 
-      {/* Content */}
-      <div className="p-4 flex flex-col flex-grow">
-        <h3 className="font-semibold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1 mb-2">
+      {/* Card Body */}
+      <div className="p-4 flex flex-col flex-1">
+        <h3 className="font-semibold text-neutral-900 text-sm line-clamp-1 mb-1.5 group-hover:text-black">
           {item.title}
         </h3>
 
-        <div className="mt-auto space-y-1 text-sm text-gray-600">
-          <p className="flex items-center">
-            <span className="font-medium mr-1 text-gray-700">Location:</span>
-            <span className="truncate">{item.location || 'Not specified'}</span>
-          </p>
-          <p className="flex items-center">
-            <span className="font-medium mr-1 text-gray-700">Date:</span>
-            <span>{formattedDate}</span>
-          </p>
+        <p className="text-neutral-500 text-xs line-clamp-2 mb-3">
+          {item.description}
+        </p>
+
+        <div className="mt-auto pt-2.5 border-t border-neutral-100 flex items-center justify-between text-[11px] text-neutral-500">
+          <span className="truncate max-w-[140px]">
+            📍 {item.location || 'Campus'}
+          </span>
+          <span>{formattedDate}</span>
         </div>
       </div>
     </Link>

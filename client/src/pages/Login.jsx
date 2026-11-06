@@ -29,14 +29,13 @@ export default function Login() {
       const response = await api.post('/auth/login', formData);
       const { token, user } = response.data;
       login(token, user);
-      // Navigate to Screen 3 (Choice page: Two Big Buttons) as specified in guide
       navigate('/choice');
     } catch (err) {
       console.error('Login error:', err);
       const message =
         err.response?.data?.message ||
         err.response?.data?.error ||
-        'Login failed. Please check your credentials.';
+        'Login failed. Please verify credentials.';
       setError(message);
     } finally {
       setSubmitting(false);
@@ -44,45 +43,43 @@ export default function Login() {
   };
 
   return (
-    <div className="max-w-md mx-auto py-12 px-4">
-      {/* White card with orange border */}
-      <div className="bg-white rounded-xl shadow-md border-t-4 border-orange-500 p-6 sm:p-8 border border-gray-100">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
-          Welcome Back
-        </h2>
-        <p className="text-sm text-gray-500 mb-6 text-center">
-          Sign in to report or manage lost and found items
-        </p>
+    <div className="max-w-sm mx-auto py-16 px-4">
+      <div className="bg-white rounded-lg border border-neutral-200 p-6 sm:p-8 shadow-xs">
+        <div className="mb-6 text-center">
+          <h1 className="text-xl font-bold tracking-tight text-neutral-900">
+            Sign In
+          </h1>
+          <p className="text-xs text-neutral-500 mt-1">
+            Access your campus Lost &amp; Found account
+          </p>
+        </div>
 
         {error && (
-          <div className="mb-5 p-3.5 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm flex items-start space-x-2">
-            <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>{error}</span>
+          <div className="mb-4 p-2.5 bg-red-50 border border-red-200 text-red-700 rounded-md text-xs">
+            {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">
-              Email Address <span className="text-red-500">*</span>
+            <label htmlFor="email" className="block font-semibold text-neutral-700 mb-1">
+              Email
             </label>
             <input
               id="email"
               name="email"
               type="email"
               required
-              placeholder="you@example.com"
+              placeholder="student@example.com"
               value={formData.email}
               onChange={handleInputChange}
-              className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+              className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-md text-neutral-900 focus:outline-none focus:border-neutral-900 focus:bg-white"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1">
-              Password <span className="text-red-500">*</span>
+            <label htmlFor="password" className="block font-semibold text-neutral-700 mb-1">
+              Password
             </label>
             <input
               id="password"
@@ -92,33 +89,23 @@ export default function Login() {
               placeholder="••••••••"
               value={formData.password}
               onChange={handleInputChange}
-              className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+              className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-md text-neutral-900 focus:outline-none focus:border-neutral-900 focus:bg-white"
             />
           </div>
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow transition-colors disabled:opacity-50 flex items-center justify-center cursor-pointer"
+            className="w-full mt-2 bg-neutral-900 hover:bg-black text-white font-semibold py-2 px-4 rounded-md shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
           >
-            {submitting ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                </svg>
-                Logging in...
-              </>
-            ) : (
-              'Sign In'
-            )}
+            {submitting ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-600 border-t border-gray-100 pt-4">
-          Don't have an account?{' '}
-          <Link to="/register" className="font-semibold text-orange-600 hover:text-orange-700 hover:underline">
-            Register here
+        <div className="mt-6 text-center text-xs text-neutral-500 border-t border-neutral-100 pt-4">
+          Need an account?{' '}
+          <Link to="/register" className="font-semibold text-neutral-900 hover:underline">
+            Register
           </Link>
         </div>
       </div>

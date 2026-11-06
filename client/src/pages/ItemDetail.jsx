@@ -18,7 +18,7 @@ export default function ItemDetail() {
         setItem(response.data);
       } catch (err) {
         console.error('Error fetching item details:', err);
-        setError('Item not found or failed to load item details.');
+        setError('Item not found or failed to load details.');
       } finally {
         setLoading(false);
       }
@@ -31,41 +31,22 @@ export default function ItemDetail() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <svg
-          className="animate-spin h-10 w-10 text-blue-600 mb-3"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          ></circle>
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8v8H4z"
-          ></path>
-        </svg>
-        <p className="text-blue-600 font-semibold text-lg">Loading item details...</p>
+      <div className="flex flex-col items-center justify-center py-20 text-neutral-400">
+        <div className="w-6 h-6 border-2 border-neutral-900 border-t-transparent rounded-full animate-spin mb-3"></div>
+        <p className="text-xs text-neutral-600">Loading item...</p>
       </div>
     );
   }
 
   if (error || !item) {
     return (
-      <div className="max-w-xl mx-auto bg-white rounded-lg shadow-md p-8 text-center my-8">
-        <p className="text-red-600 font-medium text-lg mb-6">{error || 'Item not found'}</p>
+      <div className="max-w-md mx-auto bg-white border border-neutral-200 rounded-lg p-8 text-center my-12">
+        <p className="text-xs text-red-600 mb-4">{error || 'Item not found'}</p>
         <Link
           to="/"
-          className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md shadow transition-colors"
+          className="text-xs font-semibold text-neutral-900 underline hover:text-black"
         >
-          Back to Home
+          ← Back to directory
         </Link>
       </div>
     );
@@ -74,106 +55,106 @@ export default function ItemDetail() {
   const formattedDate = item.date
     ? new Date(item.date).toLocaleDateString(undefined, {
         year: 'numeric',
-        month: 'long',
+        month: 'short',
         day: 'numeric',
       })
     : item.createdAt
     ? new Date(item.createdAt).toLocaleDateString(undefined, {
         year: 'numeric',
-        month: 'long',
+        month: 'short',
         day: 'numeric',
       })
     : 'Not specified';
 
+  const isLost = item.type?.toLowerCase() === 'lost';
+
   return (
-    <div className="max-w-3xl mx-auto py-4">
-      {/* Blue "Back to Home" button */}
-      <div className="mb-6">
+    <div className="max-w-2xl mx-auto py-4 space-y-4">
+      {/* Back button */}
+      <div>
         <Link
           to="/"
-          className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md shadow transition-colors cursor-pointer"
+          className="text-xs text-neutral-500 hover:text-neutral-900 transition-colors inline-flex items-center space-x-1"
         >
-          <svg
-            className="w-4 h-4 mr-1"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M10 19l-7-7m0 0l7-7m-7 7h18"
-            />
-          </svg>
-          Back to Home
+          <span>← Back to directory</span>
         </Link>
       </div>
 
-      <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-        {/* Large image */}
-        {item.imageUrl && (
-          <div className="w-full bg-gray-100 max-h-[480px] overflow-hidden flex items-center justify-center">
+      <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden shadow-xs">
+        {/* Photo */}
+        {item.imageUrl ? (
+          <div className="w-full bg-neutral-100 max-h-[380px] overflow-hidden flex items-center justify-center border-b border-neutral-200">
             <img
               src={item.imageUrl}
               alt={item.title}
-              className="w-full h-full object-contain max-h-[480px]"
+              className="w-full h-full object-contain max-h-[380px]"
             />
+          </div>
+        ) : (
+          <div className="w-full h-32 bg-neutral-50 flex items-center justify-center text-xs text-neutral-400 border-b border-neutral-200">
+            No image provided
           </div>
         )}
 
-        <div className="p-6 sm:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-            <h1 className="text-3xl font-bold text-gray-900">{item.title}</h1>
+        <div className="p-6">
+          {/* Header & Badges */}
+          <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+            <div>
+              <span className={`text-[11px] font-bold uppercase tracking-wider block mb-1 ${
+                isLost ? 'text-red-600' : 'text-emerald-600'
+              }`}>
+                {item.type} Item
+              </span>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900">
+                {item.title}
+              </h1>
+            </div>
+
             <StatusBadge status={item.status} type={item.type} />
           </div>
 
-          <div className="text-gray-700 text-base leading-relaxed mb-6 whitespace-pre-wrap">
+          <p className="text-xs text-neutral-600 leading-relaxed whitespace-pre-wrap mb-6">
             {item.description}
-          </div>
+          </p>
 
-          <hr className="border-gray-200 my-6" />
-
-          {/* All item details (category, location, contact, date, posted by) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div className="bg-orange-50 p-3.5 rounded-lg">
-              <span className="block text-gray-500 font-medium">Category</span>
-              <span className="text-gray-900 font-semibold text-base">
-                {item.category || 'Not specified'}
-              </span>
+          {/* Details Table in Minimalist Greys */}
+          <div className="border border-neutral-200 rounded-md divide-y divide-neutral-200 text-xs bg-neutral-50/50 mb-6">
+            <div className="p-3 flex justify-between">
+              <span className="text-neutral-500 font-medium">Category</span>
+              <span className="text-neutral-900 font-semibold">{item.category || 'Other'}</span>
             </div>
-
-            <div className="bg-orange-50 p-3.5 rounded-lg">
-              <span className="block text-gray-500 font-medium">Location</span>
-              <span className="text-gray-900 font-semibold text-base">
-                {item.location || 'Not specified'}
-              </span>
+            <div className="p-3 flex justify-between">
+              <span className="text-neutral-500 font-medium">Location</span>
+              <span className="text-neutral-900 font-semibold">{item.location || 'Campus'}</span>
             </div>
-
-            <div className="bg-orange-50 p-3.5 rounded-lg">
-              <span className="block text-gray-500 font-medium">Contact</span>
-              <span className="text-gray-900 font-semibold text-base">
-                {item.contact || 'Not specified'}
-              </span>
+            <div className="p-3 flex justify-between">
+              <span className="text-neutral-500 font-medium">Date</span>
+              <span className="text-neutral-900 font-semibold">{formattedDate}</span>
             </div>
-
-            <div className="bg-orange-50 p-3.5 rounded-lg">
-              <span className="block text-gray-500 font-medium">Date</span>
-              <span className="text-gray-900 font-semibold text-base">
-                {formattedDate}
-              </span>
-            </div>
-
             {item.postedBy && (
-              <div className="bg-orange-50 p-3.5 rounded-lg sm:col-span-2">
-                <span className="block text-gray-500 font-medium">Posted By</span>
-                <span className="text-gray-900 font-semibold text-base">
-                  {typeof item.postedBy === 'object' ? item.postedBy.name : 'Registered User'}
-                  {item.postedBy.email ? ` (${item.postedBy.email})` : ''}
+              <div className="p-3 flex justify-between">
+                <span className="text-neutral-500 font-medium">Posted by</span>
+                <span className="text-neutral-900 font-semibold">
+                  {typeof item.postedBy === 'object' ? item.postedBy.name : 'Student'}
                 </span>
               </div>
             )}
           </div>
+
+          {/* Contact Box */}
+          {item.contact && (
+            <div className="bg-neutral-100 border border-neutral-300 rounded-md p-4 text-center">
+              <span className="text-[11px] uppercase tracking-wider text-neutral-500 font-semibold block mb-1">
+                Reach the poster directly
+              </span>
+              <a
+                href={`tel:${item.contact}`}
+                className="text-sm font-bold text-neutral-900 hover:underline"
+              >
+                📞 {item.contact}
+              </a>
+            </div>
+          )}
         </div>
       </div>
     </div>

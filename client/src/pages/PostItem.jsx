@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -35,6 +35,11 @@ export default function PostItem() {
     if (error) setError(null);
   };
 
+  const handleTypeSelect = (selectedType) => {
+    setFormData((prev) => ({ ...prev, type: selectedType }));
+    if (error) setError(null);
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -56,10 +61,9 @@ export default function PostItem() {
     setSubmitting(true);
     setError(null);
 
-    // Verify token exists before making request
     const token = localStorage.getItem('token');
     if (!token) {
-      setError('You are not logged in. Please log in before posting an item.');
+      setError('You must be logged in to post an item.');
       setSubmitting(false);
       return;
     }
@@ -77,7 +81,6 @@ export default function PostItem() {
         data.append('image', image);
       }
 
-      // Automatically attaches Authorization: Bearer <token> via the api interceptor
       const response = await api.post('/items', data);
 
       if (response.data && response.data._id) {
@@ -90,106 +93,104 @@ export default function PostItem() {
       const message =
         err.response?.data?.message ||
         err.response?.data?.error ||
-        'Failed to post item. Please make sure all required fields are filled and try again.';
+        'Failed to post item. Please fill all required fields and try again.';
       setError(message);
     } finally {
       setSubmitting(false);
     }
   };
 
-  // If auth state is still loading or user is not loaded, show session check
   if (loading || !user) {
     return (
-      <div className="flex flex-col items-center justify-center py-24">
-        <svg
-          className="animate-spin h-10 w-10 text-blue-600 mb-3"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"></circle>
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8v8H4z"></path>
-        </svg>
-        <p className="text-gray-600 font-medium text-sm">Loading user session...</p>
+      <div className="flex flex-col items-center justify-center py-24 text-neutral-400">
+        <div className="w-6 h-6 border-2 border-neutral-900 border-t-transparent rounded-full animate-spin mb-3"></div>
+        <p className="text-xs text-neutral-600">Verifying session...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-4">
-      {/* Form wrapped in a white card with an orange top border */}
-      <div className="bg-white rounded-xl shadow-md border-t-4 border-orange-500 p-6 sm:p-8 border border-gray-100">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
-          Post an Item
-        </h2>
-        <p className="text-sm text-gray-500 mb-6 text-center">
-          Posting as <span className="font-semibold text-gray-700">{user.name}</span> ({user.email})
-        </p>
+    <div className="max-w-xl mx-auto py-4">
+      {/* Back navigation */}
+      <div className="mb-4">
+        <Link
+          to="/"
+          className="text-xs text-neutral-500 hover:text-neutral-900 transition-colors inline-flex items-center space-x-1"
+        >
+          <span>← Back to directory</span>
+        </Link>
+      </div>
+
+      <div className="bg-white rounded-lg border border-neutral-200 p-6 sm:p-8 shadow-xs">
+        <div className="mb-6">
+          <h1 className="text-xl font-bold tracking-tight text-neutral-900">
+            Post an Item
+          </h1>
+          <p className="text-xs text-neutral-500 mt-1">
+            Provide details below to help students identify the item.
+          </p>
+        </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm flex items-start space-x-2">
-            <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <div>
-              <p className="font-semibold">{error}</p>
-              {error.toLowerCase().includes('not logged in') && (
-                <p className="mt-1 text-xs text-red-600">
-                  Your session may have expired. Please try logging out and logging back in.
-                </p>
-              )}
-            </div>
+          <div className="mb-5 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-xs">
+            {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Type Select (lost/found) */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Important Toggle: Lost (Red) vs Found (Green) */}
           <div>
-            <label htmlFor="type" className="block text-sm font-semibold text-gray-700 mb-1">
-              Type <span className="text-red-500">*</span>
+            <label className="block text-xs font-semibold text-neutral-700 mb-1.5 uppercase tracking-wider">
+              Item Type <span className="text-red-500">*</span>
             </label>
-            <select
-              id="type"
-              name="type"
-              value={formData.type}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm bg-white"
-              required
-            >
-              <option value="lost">Lost</option>
-              <option value="found">Found</option>
-            </select>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => handleTypeSelect('lost')}
+                className={`py-2 px-3 rounded-md text-xs font-semibold transition-all flex items-center justify-center space-x-1.5 cursor-pointer border ${
+                  formData.type === 'lost'
+                    ? 'bg-red-600 text-white border-red-600 shadow-xs'
+                    : 'bg-neutral-50 text-neutral-700 border-neutral-200 hover:bg-neutral-100'
+                }`}
+              >
+                <span>🔍</span>
+                <span>Lost Item</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTypeSelect('found')}
+                className={`py-2 px-3 rounded-md text-xs font-semibold transition-all flex items-center justify-center space-x-1.5 cursor-pointer border ${
+                  formData.type === 'found'
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                    : 'bg-neutral-50 text-neutral-700 border-neutral-200 hover:bg-neutral-100'
+                }`}
+              >
+                <span>🤝</span>
+                <span>Found Item</span>
+              </button>
+            </div>
           </div>
 
-          {/* Title Input */}
+          {/* Title */}
           <div>
-            <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-1">
+            <label htmlFor="title" className="block text-xs font-semibold text-neutral-700 mb-1">
               Title <span className="text-red-500">*</span>
             </label>
             <input
               id="title"
               name="title"
               type="text"
-              placeholder="e.g., Notebook, Stainless Steel Water Bottle, Keys"
+              placeholder="e.g., Water bottle, Student ID Card, Blue Umbrella"
               value={formData.title}
               onChange={handleInputChange}
               required
-              className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+              className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-md text-xs text-neutral-900 focus:outline-none focus:border-neutral-900 focus:bg-white"
             />
           </div>
 
-          {/* Category Select */}
+          {/* Category */}
           <div>
-            <label htmlFor="category" className="block text-sm font-semibold text-gray-700 mb-1">
+            <label htmlFor="category" className="block text-xs font-semibold text-neutral-700 mb-1">
               Category <span className="text-red-500">*</span>
             </label>
             <select
@@ -198,7 +199,7 @@ export default function PostItem() {
               value={formData.category}
               onChange={handleInputChange}
               required
-              className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white transition-colors"
+              className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-md text-xs text-neutral-900 focus:outline-none focus:border-neutral-900 focus:bg-white"
             >
               <option value="Bottle">Bottle</option>
               <option value="ID Card">ID Card</option>
@@ -209,42 +210,42 @@ export default function PostItem() {
             </select>
           </div>
 
-          {/* Description Textarea */}
+          {/* Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-1">
+            <label htmlFor="description" className="block text-xs font-semibold text-neutral-700 mb-1">
               Description <span className="text-red-500">*</span>
             </label>
             <textarea
               id="description"
               name="description"
-              rows="4"
-              placeholder="Provide a detailed description of the item, color, distinguishing marks, etc."
+              rows="3"
+              placeholder="Color, brand, distinguishing marks, sticker, or condition..."
               value={formData.description}
               onChange={handleInputChange}
               required
-              className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+              className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-md text-xs text-neutral-900 focus:outline-none focus:border-neutral-900 focus:bg-white"
             ></textarea>
           </div>
 
-          {/* Location and Date grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Location and Date */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label htmlFor="location" className="block text-sm font-semibold text-gray-700 mb-1">
+              <label htmlFor="location" className="block text-xs font-semibold text-neutral-700 mb-1">
                 Location
               </label>
               <input
                 id="location"
                 name="location"
                 type="text"
-                placeholder="e.g., Library 2nd Floor, Cafeteria"
+                placeholder="e.g., Library 2nd floor, Cafeteria"
                 value={formData.location}
                 onChange={handleInputChange}
-                className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-md text-xs text-neutral-900 focus:outline-none focus:border-neutral-900 focus:bg-white"
               />
             </div>
 
             <div>
-              <label htmlFor="date" className="block text-sm font-semibold text-gray-700 mb-1">
+              <label htmlFor="date" className="block text-xs font-semibold text-neutral-700 mb-1">
                 Date
               </label>
               <input
@@ -253,55 +254,53 @@ export default function PostItem() {
                 type="date"
                 value={formData.date}
                 onChange={handleInputChange}
-                className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-md text-xs text-neutral-900 focus:outline-none focus:border-neutral-900 focus:bg-white"
               />
             </div>
           </div>
 
-          {/* Contact Input */}
+          {/* Contact */}
           <div>
-            <label htmlFor="contact" className="block text-sm font-semibold text-gray-700 mb-1">
+            <label htmlFor="contact" className="block text-xs font-semibold text-neutral-700 mb-1">
               Contact Phone / Email
             </label>
             <input
               id="contact"
               name="contact"
               type="text"
-              placeholder="e.g., 9876543210 or your contact handle"
-              value={formData.contact || user?.phone || ''}
+              placeholder="e.g., +91 9876543210"
+              value={formData.contact}
               onChange={handleInputChange}
-              className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+              className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-md text-xs text-neutral-900 focus:outline-none focus:border-neutral-900 focus:bg-white"
             />
           </div>
 
-          {/* Image File Input & Preview */}
+          {/* Image */}
           <div>
-            <label htmlFor="image" className="block text-sm font-semibold text-gray-700 mb-1">
-              Item Photo
+            <label className="block text-xs font-semibold text-neutral-700 mb-1">
+              Photo (optional)
             </label>
             <input
-              id="image"
-              name="image"
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="w-full px-3.5 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 transition-colors cursor-pointer"
+              className="w-full text-xs text-neutral-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border file:border-neutral-300 file:text-xs file:font-medium file:bg-neutral-100 hover:file:bg-neutral-200 file:text-neutral-800 cursor-pointer"
             />
 
             {imagePreview && (
               <div className="mt-3 relative inline-block">
                 <img
                   src={imagePreview}
-                  alt="Item Preview"
-                  className="h-32 w-32 object-cover rounded-lg border border-gray-200 shadow-sm"
+                  alt="Preview"
+                  className="h-28 w-28 object-cover rounded-md border border-neutral-200"
                 />
                 <button
                   type="button"
                   onClick={handleRemoveImage}
-                  className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 shadow hover:bg-red-700 transition-colors cursor-pointer"
+                  className="absolute -top-2 -right-2 bg-neutral-900 text-white rounded-full p-1 shadow hover:bg-black"
                   title="Remove image"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -309,38 +308,14 @@ export default function PostItem() {
             )}
           </div>
 
-          {/* Submit button */}
+          {/* Submit */}
           <div className="pt-2">
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow transition-colors disabled:opacity-50 flex items-center justify-center cursor-pointer text-sm"
+              className="w-full bg-neutral-900 hover:bg-black text-white font-semibold py-2.5 px-4 rounded-md text-xs tracking-wide transition-colors disabled:opacity-50 flex items-center justify-center cursor-pointer shadow-xs"
             >
-              {submitting ? (
-                <>
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8H4z"></path>
-                  </svg>
-                  Submitting Item...
-                </>
-              ) : (
-                'Submit Item'
-              )}
+              {submitting ? 'Submitting Item...' : 'Submit Listing'}
             </button>
           </div>
         </form>

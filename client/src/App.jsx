@@ -16,40 +16,38 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div className="min-h-screen bg-orange-50 text-gray-900 p-4">
-          <div className="max-w-6xl mx-auto">
-            <Navbar />
-            <main>
-              <Routes>
-                {/* Public & Flow Routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/choice" element={<Choice />} />
-                <Route path="/lost" element={<LostPage />} />
-                <Route path="/found" element={<FoundPage />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/item/:id" element={<ItemDetail />} />
+        <div className="min-h-screen bg-neutral-50 text-neutral-900 flex flex-col font-sans">
+          <Navbar />
+          <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6">
+            <Routes>
+              {/* Public & Flow Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/choice" element={<Choice />} />
+              <Route path="/lost" element={<LostPage />} />
+              <Route path="/found" element={<FoundPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/item/:id" element={<ItemDetail />} />
 
-                {/* Protected Routes */}
-                <Route
-                  path="/post"
-                  element={
-                    <ProtectedRoute>
-                      <PostItem />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/my-posts"
-                  element={
-                    <ProtectedRoute>
-                      <MyPosts />
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </main>
-          </div>
+              {/* Protected Routes */}
+              <Route
+                path="/post"
+                element={
+                  <ProtectedRoute>
+                    <PostItem />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-posts"
+                element={
+                  <ProtectedRoute>
+                    <MyPosts />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </main>
         </div>
       </AuthProvider>
     </BrowserRouter>
