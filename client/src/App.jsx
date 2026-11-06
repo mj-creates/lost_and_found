@@ -8,6 +8,9 @@ import Home from './pages/Home';
 import PostItem from './pages/PostItem';
 import ItemDetail from './pages/ItemDetail';
 import MyPosts from './pages/MyPosts';
+import Choice from './pages/Choice';
+import LostPage from './pages/LostPage';
+import FoundPage from './pages/FoundPage';
 
 export default function App() {
   return (
@@ -18,8 +21,11 @@ export default function App() {
             <Navbar />
             <main>
               <Routes>
-                {/* Public Routes */}
+                {/* Public & Flow Routes */}
                 <Route path="/" element={<Home />} />
+                <Route path="/choice" element={<Choice />} />
+                <Route path="/lost" element={<LostPage />} />
+                <Route path="/found" element={<FoundPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/item/:id" element={<ItemDetail />} />

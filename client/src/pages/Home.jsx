@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import Filters from '../components/Filters';
 import ItemCard from '../components/ItemCard';
+import { useAuth } from '../context/AuthContext';
 
 export default function Home() {
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,6 +62,47 @@ export default function Home() {
 
   return (
     <div>
+      {/* Hero / Landing Banner */}
+      <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 text-white rounded-2xl p-6 sm:p-8 shadow-lg mb-8 text-center relative overflow-hidden">
+        <div className="max-w-2xl mx-auto relative z-10">
+          <span className="text-xs uppercase font-extrabold tracking-widest bg-white/20 text-blue-100 px-3.5 py-1 rounded-full inline-block mb-3">
+            Campus Lost &amp; Found Portal
+          </span>
+          <h1 className="text-3xl sm:text-4xl font-extrabold mb-3 tracking-tight">
+            Find What You Lost. Return What You Found.
+          </h1>
+          <p className="text-blue-100 text-sm sm:text-base leading-relaxed mb-6">
+            Stop scrolling through endless chat messages. Search reported items, contact owners directly, or post a new listing in seconds.
+          </p>
+
+          {/* Two Big Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              to="/lost"
+              className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-transform hover:scale-105 flex items-center justify-center space-x-2 text-sm sm:text-base cursor-pointer"
+            >
+              <span>🔍</span>
+              <span>I Lost Something</span>
+            </Link>
+            <Link
+              to="/found"
+              className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-transform hover:scale-105 flex items-center justify-center space-x-2 text-sm sm:text-base cursor-pointer"
+            >
+              <span>🤝</span>
+              <span>I Found Something</span>
+            </Link>
+            {!user && (
+              <Link
+                to="/login"
+                className="w-full sm:w-auto bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl border border-white/30 transition-colors text-sm sm:text-base"
+              >
+                Get Started →
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Filters component at the top */}
       <Filters
         search={filters.search}

@@ -1,14 +1,18 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
 export default function PostItem() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, loading } = useAuth();
 
+  const queryType = searchParams.get('type');
+  const initialType = queryType === 'found' ? 'found' : 'lost';
+
   const [formData, setFormData] = useState(() => ({
-    type: 'lost',
+    type: initialType,
     title: '',
     description: '',
     category: 'Bottle',
@@ -67,7 +71,7 @@ export default function PostItem() {
       data.append('description', formData.description.trim());
       data.append('category', formData.category);
       data.append('location', formData.location || '');
-      data.append('contact', formData.contact || '');
+      data.append('contact', formData.contact || user?.phone || '');
       data.append('date', formData.date || new Date().toISOString());
       if (image) {
         data.append('image', image);
@@ -109,13 +113,11 @@ export default function PostItem() {
             cy="12"
             r="10"
             stroke="currentColor"
-            strokeWidth="4"
-          ></circle>
+            strokeWidth="4"></circle>
           <path
             className="opacity-75"
             fill="currentColor"
-            d="M4 12a8 8 0 018-8v8H4z"
-          ></path>
+            d="M4 12a8 8 0 018-8v8H4z"></path>
         </svg>
         <p className="text-gray-600 font-medium text-sm">Loading user session...</p>
       </div>
@@ -266,7 +268,7 @@ export default function PostItem() {
               name="contact"
               type="text"
               placeholder="e.g., 9876543210 or your contact handle"
-              value={formData.contact}
+              value={formData.contact || user?.phone || ''}
               onChange={handleInputChange}
               className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
             />
@@ -328,13 +330,11 @@ export default function PostItem() {
                       cy="12"
                       r="10"
                       stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
+                      strokeWidth="4"></circle>
                     <path
                       className="opacity-75"
                       fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8H4z"
-                    ></path>
+                      d="M4 12a8 8 0 018-8v8H4z"></path>
                   </svg>
                   Submitting Item...
                 </>

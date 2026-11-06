@@ -12,8 +12,8 @@ export default function Navbar() {
 
   return (
     <nav className="bg-blue-600 text-white rounded-xl shadow-md px-6 py-3.5 mb-6 flex flex-wrap items-center justify-between gap-4">
-      {/* Brand logo */}
-      <div className="flex items-center space-x-6">
+      {/* Brand logo & Core navigation */}
+      <div className="flex items-center space-x-4 sm:space-x-6">
         <Link
           to="/"
           className="text-xl font-bold tracking-wide hover:text-blue-100 transition-colors flex items-center space-x-2"
@@ -28,6 +28,13 @@ export default function Navbar() {
           className="text-sm font-medium hover:text-blue-100 transition-colors"
         >
           Home
+        </Link>
+        <Link
+          to="/choice"
+          className="text-sm font-semibold text-yellow-200 hover:text-white transition-colors bg-blue-700/60 px-2.5 py-1 rounded-md border border-blue-500/50 hover:bg-blue-700"
+          title="Choice Screen: I Lost Something / I Found Something"
+        >
+          ✦ I Lost / Found
         </Link>
       </div>
 

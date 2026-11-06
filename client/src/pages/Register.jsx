@@ -31,7 +31,8 @@ export default function Register() {
       const response = await api.post('/auth/register', formData);
       const { token, user } = response.data;
       login(token, user);
-      navigate('/');
+      // Navigate to Screen 3 (Choice page: Two Big Buttons) as specified in guide
+      navigate('/choice');
     } catch (err) {
       console.error('Registration error:', err);
       const message =

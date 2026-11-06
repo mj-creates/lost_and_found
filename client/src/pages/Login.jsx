@@ -29,7 +29,8 @@ export default function Login() {
       const response = await api.post('/auth/login', formData);
       const { token, user } = response.data;
       login(token, user);
-      navigate('/');
+      // Navigate to Screen 3 (Choice page: Two Big Buttons) as specified in guide
+      navigate('/choice');
     } catch (err) {
       console.error('Login error:', err);
       const message =
